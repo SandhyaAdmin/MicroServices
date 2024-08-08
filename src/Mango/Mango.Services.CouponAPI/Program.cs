@@ -30,4 +30,24 @@ app.UseAuthorization();
 
 app.MapControllers();
 
+ApplyMigration();
+
 app.Run();
+
+
+// This method will run all the pending migrations, when the app gets started instead of using update-database
+void ApplyMigration()
+{
+
+    using (var scope = app.Services.CreateScope())  // this line of code gets all the services
+    { 
+        // Get application DBContext here and check if there are any pending migrations
+
+        var _db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+
+        if (_db.Database.GetPendingMigrations().Count() > 0)
+        {
+            _db.Database.Migrate();
+        }
+    }
+}
