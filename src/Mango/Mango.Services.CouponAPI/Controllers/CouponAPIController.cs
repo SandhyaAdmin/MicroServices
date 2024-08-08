@@ -57,6 +57,80 @@ namespace Mango.Services.CouponAPI.Controllers
             return _response;
         }
 
+        [HttpGet]
+        [Route("GetByCode/{code}")]
+        public ResponseDto GetByCode(string code)
+        {
+            try
+            {
+                Coupon coupon = _appDbContext.Coupons.First(x => x.CouponCode.ToLower() == code.ToLower());
+                _response.Result = _mapper.Map<CouponDto>(coupon); 
+            }
+            catch(Exception ex) 
+            {
+                _response.Result=false;
+                _response.Message = ex.Message; 
+            }
+            return _response;
+        }
+
+        [HttpPost]
+        public ResponseDto Post([FromBody] CouponDto couponDto)
+        {
+            try
+            {
+                Coupon coupon = _mapper.Map<Coupon>(couponDto);
+                _appDbContext.Coupons.Add(coupon);
+                _appDbContext.SaveChanges();
+
+                _response.Result = _mapper.Map<CouponDto>(coupon);
+            }
+            catch (Exception ex) 
+            { 
+                _response.Result=false;
+                _response.Message = ex.Message;
+            }
+
+            return _response;
+        }
+
+        [HttpPut]
+        public ResponseDto Put([FromBody] CouponDto couponDto)
+        {
+            try
+            {
+                Coupon coupon = _mapper.Map<Coupon>(couponDto);
+                _appDbContext.Coupons.Update(coupon);
+                _appDbContext.SaveChanges();
+
+                _response.Result = _mapper.Map<CouponDto>(coupon);
+            }
+            catch (Exception ex) 
+            {
+                _response.Result=false;
+                _response.Message = ex.Message;
+            }
+            return _response;   
+        }
+
+        [HttpDelete]
+        public ResponseDto Delete(int id)
+        {
+            try
+            {
+                Coupon coupon = _appDbContext.Coupons.First(x => x.CouponId == id);
+                _appDbContext.Remove(coupon);
+                _appDbContext.SaveChanges();
+
+            }
+            catch (Exception ex)
+            {
+                _response.IsSuccess = false;    
+                _response.Message = ex.Message; 
+            }  
+            return _response;
+        }
+
 
     }
 }
