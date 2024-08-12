@@ -8,7 +8,6 @@
             POST,
     	    PUT,
     	    DELETE
-
         }
 
     }
