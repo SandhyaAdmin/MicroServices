@@ -17,12 +17,12 @@ namespace Mango.Web.Controllers
         {
             List<CouponDto> couponList = new();
             ResponseDto? response = await _couponService.GetAllCouponsAsync();
-            if (response == null && response.IsSuccess)
+            if (response != null && response.IsSuccess)
             {
                 couponList = JsonConvert.DeserializeObject<List<CouponDto>>(Convert.ToString(response.Result));
             }
 
-            return View();
+            return View(couponList);
         }
     }
 }
