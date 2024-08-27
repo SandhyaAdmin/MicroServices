@@ -2,6 +2,7 @@
 using Mango.Web.Service.IService;
 using Mango.Web.Models;
 using Newtonsoft.Json;
+using Microsoft.AspNetCore.Mvc.ModelBinding;
 
 namespace Mango.Web.Controllers
 {
@@ -24,5 +25,49 @@ namespace Mango.Web.Controllers
 
             return View(couponList);
         }
+
+        public async Task<IActionResult> CouponCreate()
+        {
+            return View();
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> CouponCreate(CouponDto model)
+        {
+            if (ModelState.IsValid)
+            {
+                ResponseDto? response = await _couponService.CreateCouponAsync(model);  
+                if (response != null && response.IsSuccess)
+                {
+                    return RedirectToAction(nameof(CouponIndex));
+                }
+            }
+            return View(model);
+        }
+
+        public async Task<IActionResult> CouponDelete(int CouponId)
+        {
+            ResponseDto? response = await _couponService.GetCouponByIdAsync(CouponId);
+            if (response != null && response.IsSuccess)
+            {
+               CouponDto model =  JsonConvert.DeserializeObject<CouponDto>(Convert.ToString(response.Result));
+                return View(model);
+            }
+            
+            return NotFound();
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> CouponDelete(CouponDto model)
+        {
+            ResponseDto? response = await _couponService.DeleteCouponAsync(model.CouponId);
+            if (response != null && response.IsSuccess)
+            {
+                return RedirectToAction(nameof(CouponIndex));
+            }
+
+            return View(model);
+        }
+
     }
 }
