@@ -8,11 +8,10 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 
 // Confifuguring the DbContext Service for Sql Connection with EF Core
-builder.Services.AddDbContext<AppDbContext>(option =>
+builder.Services.AddDbContext<AppDbContext>(options =>
 {
-    option.UseSqlServer(builder.Configuration.GetConnectionString(""));
+    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnectionString"));
 });
-
 /*
  * Note : Here, we need to tell the EF Core that we will be using .Net Identity and .EF Core
  * where we have the DBContext with .Net Identity

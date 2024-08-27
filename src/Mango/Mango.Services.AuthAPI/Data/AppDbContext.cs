@@ -21,7 +21,7 @@ namespace Mango.Services.AuthAPI.Data
         // this method is used to seed the record in a database table
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            base.OnModelCreating(modelBuilder);
+             base.OnModelCreating(modelBuilder);
         }
 
     }
