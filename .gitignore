@@ -12,3 +12,5 @@
 /src/Mango/Mango.Web/bin/Debug/net8.0
 /src/Mango/Mango.Web/obj
 /src/Mango/.vs/ProjectEvaluation
+/src/Mango/Mango.Services.AuthAPI/obj
+/src/Mango/Mango.Services.AuthAPI/Properties
