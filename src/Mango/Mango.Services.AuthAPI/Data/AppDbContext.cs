@@ -1,4 +1,5 @@
 ﻿
+using Mango.Services.AuthAPI.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
@@ -17,6 +18,8 @@ namespace Mango.Services.AuthAPI.Data
 
         }
 
+        // As ApplicationUser extending from IdentityUser, it will add one more column Name to the ASPNetUsers
+        public DbSet<ApplicationUser> ApplicationUsers { get; set; }
 
         // this method is used to seed the record in a database table
         protected override void OnModelCreating(ModelBuilder modelBuilder)
