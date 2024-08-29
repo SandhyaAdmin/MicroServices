@@ -23,6 +23,9 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 // dot net Identity core and Entity Framework core
 builder.Services.AddIdentity<ApplicationUser, IdentityRole>().AddEntityFrameworkStores<AppDbContext>()
     .AddDefaultTokenProviders();
+    
+// Configuring JWTOptions Model with the app settings values, Using the dependency injection, now we can access the JWTOptions in another class files
+builder.Services.Configure<JWTOptions>(builder.Configuration.GetSection("ApiSettings:JwtOptions"));
 
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
