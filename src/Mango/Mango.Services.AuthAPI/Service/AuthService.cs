@@ -4,6 +4,7 @@ using Mango.Services.AuthAPI.Models.Dto;
 using Mango.Services.AuthAPI.Service.IService;
 using Microsoft.AspNetCore.Identity;
 using System.Diagnostics.Eventing.Reader;
+using System.Reflection.Metadata.Ecma335;
 
 namespace Mango.Services.AuthAPI.Service
 {
@@ -70,10 +71,37 @@ namespace Mango.Services.AuthAPI.Service
 
 
         }
-        public Task<LoginResponseDto> Login(LoginRequestDto loginRequestDto)
+        public async Task<LoginResponseDto> Login(LoginRequestDto loginRequestDto)
         {
-            throw new NotImplementedException();
+            // get the user details from db
+            var user = _db.ApplicationUsers.FirstOrDefault(x => x.UserName.ToLower() == loginRequestDto.Username.ToLower());
+
+            // user dotnet identity helper metjods to validate the password
+
+            bool IsValid = await _userManager.CheckPasswordAsync(user, loginRequestDto.Password);
+            if (user  == null || !IsValid) {
+                return new LoginResponseDto() { User = null, Token = ""}; 
+            }
+
+            // If user wad found we need to generate the JWT Token
+
+            UserDto userDto = new UserDto()
+            {
+                ID = user.Id,
+                Name = user.Name,
+                Email = user.Email,
+                PhoneNumber = user.PhoneNumber,
+
+            };
+            LoginResponseDto loginResponseDto = new LoginResponseDto()
+            {
+                User = userDto,
+                Token = ""
+            };
+
+            return loginResponseDto;
         }
+      
 
     }
 }
