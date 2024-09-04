@@ -1,5 +1,6 @@
 ﻿using Mango.Services.AuthAPI.Models;
 using Mango.Services.AuthAPI.Service.IService;
+using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
@@ -10,10 +11,10 @@ namespace Mango.Services.AuthAPI.Service
     public class JwtTokenGenerator : IJwtTokenGenerator
     {
         private readonly JWTOptions _jwtOptions;
-        public JwtTokenGenerator(JWTOptions jwtOptions) 
+        public JwtTokenGenerator(IOptions<JWTOptions> jwtOptions) 
         {
             // Configured JwtOptions in program.cs which are required to generate the token, and retrive them in constructor using dependency injection
-            _jwtOptions = jwtOptions;
+            _jwtOptions = jwtOptions.Value;
 
         }
         public string GenerateToken(ApplicationUser applicationUser)
@@ -40,7 +41,8 @@ namespace Mango.Services.AuthAPI.Service
                 Issuer = _jwtOptions.Issuer,
                 Audience = _jwtOptions.Audience,
                 SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature),
-                Subject = new ClaimsIdentity(claimList)
+                Subject = new ClaimsIdentity(claimList),
+                Expires = DateTime.UtcNow.AddDays(360)
             };
 
             var token = tokenHandler.CreateToken(tokenDescriptor);

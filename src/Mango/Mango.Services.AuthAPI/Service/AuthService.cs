@@ -15,12 +15,14 @@ namespace Mango.Services.AuthAPI.Service
         // using Helper classes/mehods available in Identity to regiter and save data to ASPNetRoles
         private readonly  UserManager<ApplicationUser> _userManager;
         private readonly RoleManager<IdentityRole> _roleManger;
+        private readonly IJwtTokenGenerator _jwtTokenGenerator; 
 
-        public AuthService(AppDbContext db, UserManager<ApplicationUser> userManager, RoleManager<IdentityRole> roleManger)
+        public AuthService(AppDbContext db, UserManager<ApplicationUser> userManager, RoleManager<IdentityRole> roleManger, IJwtTokenGenerator jwtTokenGenerator)
         {
             _db = db;
             _userManager = userManager;
             _roleManger = roleManger;
+            _jwtTokenGenerator = jwtTokenGenerator; 
         }
 
         public async Task<string> Register(RegistrationRequestDto registrationRequestDto)
@@ -85,6 +87,8 @@ namespace Mango.Services.AuthAPI.Service
 
             // If user was found we need to generate the JWT Token
 
+            var token = _jwtTokenGenerator.GenerateToken(user);
+
             UserDto userDto = new UserDto()
             {
                 ID = user.Id,
@@ -96,7 +100,7 @@ namespace Mango.Services.AuthAPI.Service
             LoginResponseDto loginResponseDto = new LoginResponseDto()
             {
                 User = userDto,
-                Token = ""
+                Token = token
             };
 
             return loginResponseDto;
