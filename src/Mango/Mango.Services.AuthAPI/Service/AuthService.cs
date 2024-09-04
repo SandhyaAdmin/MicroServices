@@ -54,7 +54,7 @@ namespace Mango.Services.AuthAPI.Service
                     };
 
                     // If user got registered successfully returning emty string
-                    return "";
+                    return null;
                 }
                 else
                 {
