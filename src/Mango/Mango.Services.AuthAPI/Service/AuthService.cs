@@ -83,7 +83,7 @@ namespace Mango.Services.AuthAPI.Service
                 return new LoginResponseDto() { User = null, Token = ""}; 
             }
 
-            // If user wad found we need to generate the JWT Token
+            // If user was found we need to generate the JWT Token
 
             UserDto userDto = new UserDto()
             {
