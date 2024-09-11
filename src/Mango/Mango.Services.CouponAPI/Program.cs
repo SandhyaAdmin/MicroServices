@@ -1,7 +1,10 @@
 using AutoMapper;
 using Mango.Services.CouponAPI;
 using Mango.Services.CouponAPI.Data;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -25,6 +28,33 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+// we need to add authentication
+
+var secret = builder.Configuration.GetValue<string>("ApiSettings:Secret");
+var issuer = builder.Configuration.GetValue<string>("ApiSettings:Issuer");
+var audience = builder.Configuration.GetValue<string>("ApiSettings:Audience");
+
+var key = Encoding.ASCII.GetBytes(secret);
+
+builder.Services.AddAuthentication(x =>
+{
+    x.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+    x.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+}).AddJwtBearer(x =>
+{
+    x.TokenValidationParameters = new TokenValidationParameters
+    {
+        ValidateIssuerSigningKey = true,
+        IssuerSigningKey = new SymmetricSecurityKey(key),
+        ValidateIssuer = true,
+        ValidIssuer = issuer,
+        ValidAudience = audience,  
+        ValidateAudience = true
+    };  
+});
+
+builder.Services.AddAuthentication();
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -35,6 +65,9 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
+// If we are authenticating, we are validating 3 things, We have the secret, we have the issuer and we have the audience, we have to validate our token using all 3 of them
+app.UseAuthentication();
 
 app.UseAuthorization();
 
