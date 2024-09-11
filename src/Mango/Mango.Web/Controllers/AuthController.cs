@@ -8,7 +8,7 @@ namespace Mango.Web.Controllers
     {
         private readonly IAuthService _authService;
 
-        private AuthController(IAuthService authService)
+        public AuthController(IAuthService authService)
         {
             _authService = authService;
         }
@@ -16,7 +16,8 @@ namespace Mango.Web.Controllers
         [HttpGet]
         public IActionResult Register()
         {
-            return View();
+            RegistrationRequestDto registrationRequestDto = new();
+            return View(registrationRequestDto);
         }
 
         [HttpGet]
