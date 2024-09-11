@@ -52,8 +52,12 @@ namespace Mango.Web.Controllers
                     TempData["Success"] = "Registration Successfull";
                     return RedirectToAction(nameof(Login));
                 }
-
             }
+            else
+            {
+                TempData["error"] = result.Message;
+            }
+
             var roleList = new List<SelectListItem>()
             {
                 new SelectListItem{Text = StaticDetails.RoleAdmin, Value = StaticDetails.RoleAdmin},
@@ -90,7 +94,8 @@ namespace Mango.Web.Controllers
             else
             {
                 // In Login page, we have Display login summery, because of that we can add custom error
-                ModelState.AddModelError("CustomError", responseDto.Message);
+                //ModelState.AddModelError("CustomError", responseDto.Message);
+                TempData["error"] = responseDto.Message;
                 return View(loginRequestDto);
             }
 
