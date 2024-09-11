@@ -124,6 +124,13 @@ namespace Mango.Web.Controllers
             identity.AddClaim(new Claim(ClaimTypes.Name,
                 jwt.Claims.FirstOrDefault(x => x.Type == JwtRegisteredClaimNames.Email).Value));
 
+            // The reason, we are using ClaimTypes.Role here is, bcz with the dotnet integration if you have added
+            // claimType of role, you have optopn to add [Authorize(Role = StaticDetail.RoleAdmin])] attribute
+            // this is automatically taken care of, because the claim is assigned when you are signing the user.
+
+            identity.AddClaim(new Claim(ClaimTypes.Role,
+                jwt.Claims.FirstOrDefault(x => x.Type == "role").Value));
+
 
 
             var principle = new ClaimsPrincipal(identity);

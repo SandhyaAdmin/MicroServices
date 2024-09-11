@@ -17,7 +17,7 @@ namespace Mango.Services.AuthAPI.Service
             _jwtOptions = jwtOptions.Value;
 
         }
-        public string GenerateToken(ApplicationUser applicationUser)
+        public string GenerateToken(ApplicationUser applicationUser, IEnumerable<string> roles)
         {
             // Generate the token based on application user using JWTSecurityTokenHandler
             var tokenHandler = new JwtSecurityTokenHandler();
@@ -34,6 +34,10 @@ namespace Mango.Services.AuthAPI.Service
                 new Claim(JwtRegisteredClaimNames.Sub, applicationUser.Id),
                 new Claim(JwtRegisteredClaimNames.Name, applicationUser.UserName)
             };
+
+            // we are adding ClaimTypes.Role(dotnet type) as in the project we are accessing/checking if user has a role,
+            //it automatically do that mapping.
+            claimList.AddRange(roles.Select(role => new Claim(ClaimTypes.Role, role)));
 
             // We need tokenDesctiptor along with key and claim that have some configuration properties of a token
             var tokenDescriptor = new SecurityTokenDescriptor
