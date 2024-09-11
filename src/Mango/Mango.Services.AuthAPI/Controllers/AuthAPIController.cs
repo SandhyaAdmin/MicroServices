@@ -43,7 +43,8 @@ namespace Mango.Services.AuthAPI.Controllers
                 _response.Message = "UserName and Password is InCorrect";
                 return BadRequest(_response);   
             }
-            return Ok(loginResponse);
+            _response.Result = loginResponse;
+            return Ok(_response);
         }
 
         [HttpPost("AssignRole")]
