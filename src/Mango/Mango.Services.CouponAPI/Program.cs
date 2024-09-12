@@ -4,6 +4,7 @@ using Mango.Services.CouponAPI.Data;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi.Models;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -26,7 +27,31 @@ builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+
+// Enabling authentication in swagger generation
+builder.Services.AddSwaggerGen(options =>
+{
+    options.AddSecurityDefinition(name: JwtBearerDefaults.AuthenticationScheme, securityScheme: new OpenApiSecurityScheme
+    {
+        Name = "Authorization",
+        Description = "Enter the Bearer Authorization string as following : `Bearer Generated-JWT-Token`",
+        In = ParameterLocation.Header,
+        Type = SecuritySchemeType.ApiKey,
+        Scheme = "Bearer"
+    });
+    options.AddSecurityRequirement(new OpenApiSecurityRequirement
+    {{
+                new OpenApiSecurityScheme
+        {
+            Reference=  new OpenApiReference
+            {
+                Type = ReferenceType.SecurityScheme,
+                Id = JwtBearerDefaults.AuthenticationScheme
+            }
+        }, new string[]{}
+        }
+    });
+});
 
 // we need to add authentication
 
@@ -48,9 +73,9 @@ builder.Services.AddAuthentication(x =>
         IssuerSigningKey = new SymmetricSecurityKey(key),
         ValidateIssuer = true,
         ValidIssuer = issuer,
-        ValidAudience = audience,  
+        ValidAudience = audience,
         ValidateAudience = true
-    };  
+    };
 });
 
 builder.Services.AddAuthentication();
@@ -83,7 +108,7 @@ void ApplyMigration()
 {
 
     using (var scope = app.Services.CreateScope())  // this line of code gets all the services
-    { 
+    {
         // Get application DBContext here and check if there are any pending migrations
 
         var _db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
