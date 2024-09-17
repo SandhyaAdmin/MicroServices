@@ -83,9 +83,45 @@ namespace Mango.Web.Controllers
         {
             _responseDto = await _productService.DeleteProductByIdAsync(product.ProductId);
 
-            if(_responseDto.Result != null && _responseDto.IsSuccess)
+            if(_responseDto.IsSuccess)
             {
                 TempData["success"] = "Prodcut deleted successfully";
+                return RedirectToAction(nameof(ProductIndex));
+            }
+            else
+            {
+                TempData["error"] = _responseDto?.Message;
+            }
+
+            return View(product);
+        }
+
+        public async Task<IActionResult> ProductEdit(int productId)
+        {
+            _responseDto = await _productService.GetProductByIdAsync(productId);
+
+            if (_responseDto != null && _responseDto.IsSuccess)
+            {
+                ProductDto product = JsonConvert.DeserializeObject<ProductDto>(Convert.ToString(_responseDto.Result));
+
+                return View(product);
+            }
+            else
+            {
+                TempData["error"] = _responseDto?.Message;
+            }
+
+            return NotFound();
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> ProductEdit(ProductDto product)
+        {
+            _responseDto = await _productService.UpdateProductAsync(product);
+
+            if (_responseDto.Result != null && _responseDto.IsSuccess)
+            {
+                TempData["success"] = "Prodcut edited successfully";
                 return RedirectToAction(nameof(ProductIndex));
             }
             else
