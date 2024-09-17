@@ -1,32 +1,59 @@
 ﻿using Mango.Web.Models;
 using Mango.Web.Service.IService;
+using Mango.Web.Utility;
 
 namespace Mango.Web.Service
 {
     public class ProductService : IProductService
     {
-        public Task<ResponseDto?> GetAllProductsAsync()
-        {
-            throw new NotImplementedException();
+        private  readonly IBaseService _baseService;
+
+        public ProductService(IBaseService baseService) 
+        { 
+            _baseService = baseService;
         }
 
-        public Task<ResponseDto?> GetProductByIdAsync()
+        public async Task<ResponseDto?> GetAllProductsAsync()
         {
-            throw new NotImplementedException();
+            return await _baseService.SendAsync(new RequestDto()
+            {
+                ApiType = StaticDetails.ApiType.GET,
+                Url = StaticDetails.ProductAPIBase + "/api/product"
+            });
         }
-        public Task<ResponseDto?> CreateProductAsync(ProductDto productDto)
+        public async Task<ResponseDto?> GetProductByIdAsync(int id)
         {
-            throw new NotImplementedException();
+            return await _baseService.SendAsync(new RequestDto()
+            {
+                ApiType = StaticDetails.ApiType.GET,
+                Url = StaticDetails.ProductAPIBase +"/api/product/" + id
+            });
         }
-
-
-        public Task<ResponseDto?> UpdateProductAsync(ProductDto productDto)
+        public async Task<ResponseDto?> CreateProductAsync(ProductDto productDto)
         {
-            throw new NotImplementedException();
+            return await _baseService.SendAsync(new RequestDto()
+            {
+                ApiType = StaticDetails.ApiType.POST,
+                Url = StaticDetails.ProductAPIBase + "/api/product",
+                Data = productDto
+            });
         }
-        public Task<ResponseDto?> DeleteProductByIdAsync(int id)
+        public async Task<ResponseDto?> UpdateProductAsync(ProductDto productDto)
         {
-            throw new NotImplementedException();
+            return await _baseService.SendAsync(new RequestDto()
+            {
+                ApiType = StaticDetails.ApiType.PUT,
+                Url = StaticDetails.ProductAPIBase + "/api/product",
+                Data = productDto
+            });
+        }
+        public async Task<ResponseDto?> DeleteProductByIdAsync(int id)
+        {
+            return await _baseService.SendAsync(new RequestDto()
+            {
+                ApiType = StaticDetails.ApiType.DELETE,
+                Url = StaticDetails.CouponAPIBase + "/api/coupon/" + id
+            });
         }
     }
 }
