@@ -20,13 +20,15 @@ namespace Mango.Services.ShoppingCartAPI.Controllers
         private IMapper _mapper;
         private readonly AppDbContext _appDbContext;
         private IProductService _productService;
+        private ICouponService _couponService;
 
-        public CartAPIController(IMapper mapper, AppDbContext appDbContext, IProductService productService)
+        public CartAPIController(IMapper mapper, AppDbContext appDbContext, IProductService productService, ICouponService couponService)
         {
             _response = new ResponseDto();
             _mapper = mapper;
             _appDbContext = appDbContext;
             _productService = productService;
+            _couponService = couponService;
         }
 
         [HttpPost("ApplyCoupon")]
@@ -178,6 +180,17 @@ namespace Mango.Services.ShoppingCartAPI.Controllers
                 {
                     item.Product = productDtos.FirstOrDefault(u => u.ProductId == item.ProductId);
                     cartDto.CartHeader.CartTotal += (item.Count * item.Product.Price);
+                }
+
+                // Apply coupon if any
+                if (!String.IsNullOrEmpty(cartDto.CartHeader.CouponCode)) 
+                { 
+                    CouponDto couponDto = await _couponService.GetCoupon(cartDto.CartHeader.CouponCode);
+                    if (couponDto != null && cartDto.CartHeader.CartTotal > couponDto.MinAmount)
+                    {
+                        cartDto.CartHeader.CartTotal -= couponDto.DiscountAmout;
+                        cartDto.CartHeader.Discount = couponDto.DiscountAmout;
+                    }
                 }
 
                 _response.Result = cartDto;
