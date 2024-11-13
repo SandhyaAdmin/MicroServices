@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 using System.Diagnostics;
+using System.IdentityModel.Tokens.Jwt;
 
 namespace Mango.Web.Controllers
 {
@@ -13,11 +14,13 @@ namespace Mango.Web.Controllers
     {
         private readonly IProductService _productService;
         private ResponseDto _responseDto;
+        private readonly ICartService _cartService;
            
-        public HomeController(IProductService productService)
+        public HomeController(IProductService productService, ICartService cartService)
         {
             _productService = productService;
             _responseDto = new ResponseDto();
+            _cartService = cartService;
         }
 
         public async Task<IActionResult> Index()
@@ -48,6 +51,42 @@ namespace Mango.Web.Controllers
             if (_responseDto != null && _responseDto.IsSuccess)
             {
                 productDto = JsonConvert.DeserializeObject<ProductDto>(Convert.ToString(_responseDto.Result));
+            }
+            else
+            {
+                TempData["error"] = _responseDto?.Message;
+            }
+
+            return View(productDto);
+        }
+
+        [Authorize]
+        [HttpPost]
+        [ActionName("ProductDetails")]
+        public async Task<IActionResult> ProductDetails(ProductDto productDto)
+        {
+            CartDto cartDto = new CartDto
+            {
+                CartHeader = new CartHeaderDto
+                {
+                    UserId = User.Claims.Where(u => u.Type == JwtRegisteredClaimNames.Sub)?.FirstOrDefault()?.Value
+                }
+            };
+
+            CartDetailsDto cartDetailsDto = new CartDetailsDto
+            {
+                Count = productDto.Count,
+                ProductId = productDto.ProductId,
+            };
+            List<CartDetailsDto> cartDetailsDtos = new List<CartDetailsDto>() { cartDetailsDto };
+            cartDto.CartDetails = cartDetailsDtos;
+
+            _responseDto = await _cartService.UpsertAsync(cartDto);
+
+            if (_responseDto != null && _responseDto.IsSuccess)
+            {
+                TempData["success"] = "Item has been added to the shopping cart";
+                return RedirectToAction(nameof(Index));
             }
             else
             {

@@ -16,7 +16,7 @@ namespace Mango.Services.ShoppingCartAPI.Service
             IEnumerable<ProductDto> productDtos = new List<ProductDto>();
 
             var client = _httpClientFactory.CreateClient("Product");
-            var response = await client.GetAsync($"/api/product");
+            var response = await client.GetAsync($"api/product");
             var apiContent = await response.Content.ReadAsStringAsync();   
             
             var res = JsonConvert.DeserializeObject<ResponseDto>(apiContent);
