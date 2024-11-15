@@ -1,4 +1,5 @@
 using AutoMapper;
+using Mango.MessageBus;
 using Mango.Services.ShoppingCartAPI;
 using Mango.Services.ShoppingCartAPI.Data;
 using Mango.Services.ShoppingCartAPI.Extensions;
@@ -39,6 +40,8 @@ new Uri(builder.Configuration["ServiceUrls:CouponAPI"])).AddHttpMessageHandler<B
 //Adding the prodcut service
 builder.Services.AddScoped<IProductService, ProductService>();
 builder.Services.AddScoped<ICouponService, CouponService>();
+
+builder.Services.AddScoped<IMessageBus, MessageBus>();  
 
 /* Here we have added backendapi authentication handlers, that we are cretes, but when we are registering 
 the services, at that point we need to add http message handlers
