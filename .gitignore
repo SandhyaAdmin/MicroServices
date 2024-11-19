@@ -22,3 +22,5 @@
 /src/Mango/Mango.Services.ShoppingCartAPI/obj
 /src/Mango/Mango.Services.ShoppingCartAPI/bin/Debug/net8.0
 /src/Mango/Mango.MessageBus/obj/Debug/net8.0
+/src/Mango/Mango.Services.EmailAPI/obj
+/src/Mango/Mango.Services.EmailAPI/bin/Debug/net8.0
