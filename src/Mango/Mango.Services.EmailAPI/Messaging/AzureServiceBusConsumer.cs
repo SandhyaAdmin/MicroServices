@@ -1,5 +1,6 @@
 ﻿using Azure.Messaging.ServiceBus;
 using Mango.Services.EmailAPI.Models.Dto;
+using Mango.Services.EmailAPI.Services;
 using Newtonsoft.Json;
 using System.Text;
 
@@ -13,10 +14,13 @@ namespace Mango.Services.EmailAPI.Messaging
 
         private readonly IConfiguration _configuration;
 
+        private readonly EmailService _emailService;
+
         private ServiceBusProcessor _emailCartProcessor;
 
-        public AzureServiceBusConsumer(IConfiguration configuration)
+        public AzureServiceBusConsumer(IConfiguration configuration, EmailService emailService)
         {
+            _emailService = emailService;
             _configuration = configuration;
 
             serviceBusConnectionString = _configuration.GetValue<string>("ServiceBusConnectionString");
@@ -53,6 +57,7 @@ namespace Mango.Services.EmailAPI.Messaging
             try
             {
                 //TODO - try to log email
+                await _emailService.EmailCartAndLog(cartDto);
                 //the below line tells the queue that message has been processed successfully and you can remove that from your queue
                 await args.CompleteMessageAsync(args.Message);
             }
