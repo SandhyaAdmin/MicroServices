@@ -1,4 +1,6 @@
 using Mango.Services.EmailAPI.Data;
+using Mango.Services.EmailAPI.Extension;
+using Mango.Services.EmailAPI.Messaging;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -14,6 +16,8 @@ builder.Services.AddDbContext<AppDbContext>(option =>
 {
     option.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnectionString"));
 });
+
+builder.Services.AddSingleton<IAzureServiceBusConsumer,AzureServiceBusConsumer>();
 
 var app = builder.Build();
 
@@ -31,6 +35,8 @@ app.UseAuthorization();
 app.MapControllers();
 
 ApplyMigration();
+
+app.UseServiceBusConsumer();
 
 app.Run();
 
