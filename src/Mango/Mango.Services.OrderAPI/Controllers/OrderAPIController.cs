@@ -28,7 +28,7 @@ namespace Mango.Services.OrderAPI.Controllers
         }
 
         [Authorize]
-        [HttpPost("CreateDto")]
+        [HttpPost("CreateOrder")]
         public async Task<ResponseDto> CreateDto([FromBody] CartDto cartDto)
         {
             try
@@ -41,7 +41,7 @@ namespace Mango.Services.OrderAPI.Controllers
                 orderHeaderDto.OrderDetails = _mapper.Map<IEnumerable<OrderDetailsDto>>(cartDto.CartDetails);
                 
                 // If want to access the Entity, I cam use entity
-                OrderHeader orderCreated = await _db.OrderHeaders.AddAsync(_mapper.Map<OrderHeader>(orderHeaderDto)).Entity;
+                OrderHeader orderCreated = _db.OrderHeaders.Add(_mapper.Map<OrderHeader>(orderHeaderDto)).Entity;
 
                 await _db.SaveChangesAsync();
 
