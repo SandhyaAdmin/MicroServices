@@ -88,8 +88,6 @@ namespace Mango.Services.CouponAPI.Controllers
                 _appDbContext.Coupons.Add(coupon);
                 _appDbContext.SaveChanges();
 
-    //            stripe.StripeConfiguration.ApiKey = "sk_test_51QlyG8DmlajqQcVLzD2FOvpa5qe9DLtqYI5a2UKj7WwyWrsN9aikXkxWWlwnH9IzmLyODNCqZRlHPPOi9Q4H8Uaq006r5O4eo0";
-
                 var options = new stripe.CouponCreateOptions
                 {
                     Name = coupon.CouponCode,
