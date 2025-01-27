@@ -53,6 +53,23 @@ namespace Mango.Web.Controllers
             {
                 // If oder is save in db then we need to work on payment gate way
                 // get stripe session and redirect to stripe to place an order
+
+                var domain = Request.Scheme + "://" + Request.Host.Value + "/";
+                StripeRequestDto stripeRequestDto = new StripeRequestDto()
+                {
+                    ApprovedUrl = domain + "cart/Confirmation?orderId=" + orderHeader.OrderHeaderId,
+                    CancelUrl = domain + "cart/Checkout",
+                    OrderHeader = orderHeader
+                };
+
+                var stripeResponse = await _orderService.CreateStripeSession(stripeRequestDto);
+
+                StripeRequestDto stripeResponseResult = JsonConvert.DeserializeObject<StripeRequestDto>(Convert.ToString(stripeResponse.Result));
+
+                // We need to redirect our application Session URL that way it will take us to stripe check out page
+                Response.Headers.Add("Location", stripeResponseResult.StripeSessionUrl);
+
+                return new StatusCodeResult(303); // It denotes that there is redirect to another page
             }
 
             return View();
