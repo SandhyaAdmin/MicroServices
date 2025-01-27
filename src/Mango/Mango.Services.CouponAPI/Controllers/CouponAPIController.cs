@@ -4,6 +4,7 @@ using Mango.Services.CouponAPI.Models;
 using Mango.Services.CouponAPI.Models.Dto;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using stripe = Stripe;
 
 namespace Mango.Services.CouponAPI.Controllers
 {
@@ -83,8 +84,21 @@ namespace Mango.Services.CouponAPI.Controllers
             try
             {
                 Coupon coupon = _mapper.Map<Coupon>(couponDto);
+
                 _appDbContext.Coupons.Add(coupon);
                 _appDbContext.SaveChanges();
+
+    //            stripe.StripeConfiguration.ApiKey = "sk_test_51QlyG8DmlajqQcVLzD2FOvpa5qe9DLtqYI5a2UKj7WwyWrsN9aikXkxWWlwnH9IzmLyODNCqZRlHPPOi9Q4H8Uaq006r5O4eo0";
+
+                var options = new stripe.CouponCreateOptions
+                {
+                    Name = coupon.CouponCode,
+                    Currency = "usd",
+                    PercentOff = (long)(coupon.DiscountAmout),
+                    Id = coupon.CouponCode
+                };
+                var service = new stripe.CouponService();
+                service.Create(options);
 
                 _response.Result = _mapper.Map<CouponDto>(coupon);
             }
@@ -127,6 +141,10 @@ namespace Mango.Services.CouponAPI.Controllers
                 Coupon coupon = _appDbContext.Coupons.First(x => x.CouponId == id);
                 _appDbContext.Remove(coupon);
                 _appDbContext.SaveChanges();
+
+        
+                var service = new stripe.CouponService();
+                service.Delete(coupon.CouponCode);
 
             }
             catch (Exception ex)
