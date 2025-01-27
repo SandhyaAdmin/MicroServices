@@ -1,6 +1,6 @@
 ﻿@model CartDto
 
-<form method="post">
+<form method="post" asp-action="PlaceOrder">
     <input asp-for="CartHeader.UserId" hidden/>
     <input asp-for="CartHeader.CartHeaderId" hidden />
     <input asp-for="CartHeader.CouponCode" hidden />

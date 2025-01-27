@@ -1,5 +1,6 @@
 ﻿
 using Mango.Web.Models;
+using Mango.Web.Models.Dto;
 using Mango.Web.Service.IService;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -11,9 +12,11 @@ namespace Mango.Web.Controllers
     public class CartController : Controller
     {
         private readonly ICartService _cartService;
-        public CartController(ICartService cartService) 
+        private readonly IOrderService _orderService;
+        public CartController(ICartService cartService, IOrderService orderService) 
         { 
             _cartService = cartService;
+            _orderService = orderService;
         }
 
         [Authorize]
@@ -22,13 +25,45 @@ namespace Mango.Web.Controllers
             return View(await LoadCartDtoBasedOnLoggedInUser());
         }
 
-        [Authorize]
+       [Authorize]
+        //view
         public async Task<IActionResult> Checkout()
         {
+
             return View(await LoadCartDtoBasedOnLoggedInUser());
         }
 
+        [HttpPost]
+        //[ActionName("Checkout")]
+        public async Task<IActionResult> PlaceOrder(CartDto cartDto)
+        {
+            // we receive the cartDto with the Post, which we need to pass down the order api
+            //cartDto : Post Request, which we get from view, once we click on checkout
+            // Load latest cart dto details
 
+            CartDto cart = await LoadCartDtoBasedOnLoggedInUser();
+            cart.CartHeader.Phone = cartDto.CartHeader.Phone;
+            cart.CartHeader.Email = cartDto.CartHeader.Email;
+            cart.CartHeader.Name = cartDto.CartHeader.Name;
+
+            var response = await _orderService.CreateOrder(cart);
+            OrderHeaderDto orderHeader = JsonConvert.DeserializeObject<OrderHeaderDto>(Convert.ToString(response.Result));
+
+            if (response != null && response.IsSuccess)
+            {
+                // If oder is save in db then we need to work on payment gate way
+                // get stripe session and redirect to stripe to place an order
+            }
+
+            return View();
+
+
+        }
+
+        public async Task<IActionResult> Confirmation(int orderId)
+        {
+            return View(orderId);
+        }
 
 
         private async Task<CartDto> LoadCartDtoBasedOnLoggedInUser()

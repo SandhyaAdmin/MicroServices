@@ -7,6 +7,7 @@ using Mango.Services.OrderAPI.Models.Dto;
 using Microsoft.AspNetCore.Authorization;
 using Mango.Services.OrderAPI.Utility;
 using Mango.Services.OrderAPI.Models;
+using Newtonsoft.Json;
 
 namespace Mango.Services.OrderAPI.Controllers
 {
@@ -19,15 +20,15 @@ namespace Mango.Services.OrderAPI.Controllers
         private readonly AppDbContext _db;
         private IProductService _productService;
 
-        public OrderAPIController(ResponseDto response, IMapper mapper, AppDbContext db, IProductService productService)
+        public OrderAPIController(IMapper mapper, AppDbContext db, IProductService productService)
         {
-            _response = response;
+            _response = new ResponseDto();
             _mapper = mapper;
             _db = db;
             _productService = productService;
         }
 
-        [Authorize]
+        //[Authorize]
         [HttpPost("CreateOrder")]
         public async Task<ResponseDto> CreateDto([FromBody] CartDto cartDto)
         {
@@ -39,7 +40,8 @@ namespace Mango.Services.OrderAPI.Controllers
                 // Initially, status is pending, once the payment is processed, will change the status to approved
 
                 orderHeaderDto.OrderDetails = _mapper.Map<IEnumerable<OrderDetailsDto>>(cartDto.CartDetails);
-                
+
+
                 // If want to access the Entity, I cam use entity
                 OrderHeader orderCreated = _db.OrderHeaders.Add(_mapper.Map<OrderHeader>(orderHeaderDto)).Entity;
 

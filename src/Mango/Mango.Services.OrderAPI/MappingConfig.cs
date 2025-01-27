@@ -24,7 +24,7 @@ namespace Mango.Services.OrderAPI
 
                 config.CreateMap<OrderHeader, OrderHeaderDto>().ReverseMap();
 
-                config.CreateMap<OrderDetailsDto,OrderDetailsDto>().ReverseMap();
+                config.CreateMap<OrderDetails,OrderDetailsDto>().ReverseMap();
             });
 
             return mappingConfig;
