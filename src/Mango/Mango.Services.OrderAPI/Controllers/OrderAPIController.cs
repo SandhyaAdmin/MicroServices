@@ -9,6 +9,7 @@ using Mango.Services.OrderAPI.Utility;
 using Mango.Services.OrderAPI.Models;
 using Newtonsoft.Json;
 using Stripe;
+using Stripe.Checkout;
 
 namespace Mango.Services.OrderAPI.Controllers
 {
@@ -67,23 +68,51 @@ namespace Mango.Services.OrderAPI.Controllers
         {
             try
             {
-                StripeConfiguration.ApiKey = "sk_test_4eC39HqLyjWDarjtT1zdp7dc";
-
                 var options = new Stripe.Checkout.SessionCreateOptions
                 {
-                    SuccessUrl = "https://example.com/success",
-                    LineItems = new List<Stripe.Checkout.SessionLineItemOptions>
-                           {
-                               new Stripe.Checkout.SessionLineItemOptions
-                               {
-                                   Price = "price_1MotwRLkdIwHu7ixYcPLm5uZ",
-                                   Quantity = 2,
-                               },
-                           },
+                    SuccessUrl = stripeRequestDto.ApprovedUrl,
+                    CancelUrl = stripeRequestDto.CancelUrl,
+                    LineItems = new List<Stripe.Checkout.SessionLineItemOptions>(),
                     Mode = "payment",
                 };
+
+                foreach (var item in stripeRequestDto.OrderHeader.OrderDetails)
+                {
+                    var sessionLineItem = new SessionLineItemOptions()
+                    {
+                        PriceData = new SessionLineItemPriceDataOptions()
+                        {
+                            UnitAmount = (long)(item.Price* 100), //$20.99 -> 2099
+                            Currency = "usd",
+                            ProductData = new SessionLineItemPriceDataProductDataOptions
+                            {
+                                Name = item.Product.Name
+                            }
+                        },
+                        Quantity = item.Count
+                    };
+
+                    options.LineItems.Add(sessionLineItem);
+                }
+
                 var service = new Stripe.Checkout.SessionService();
-                service.Create(options);
+                // the below is not a dotnet core session, its a stripe session
+                Session session = service.Create(options);
+
+                //based on the below url, our web application know where it has to redirected to capture the payment
+                stripeRequestDto.StripeSessionUrl = session.Url;
+
+                //but we will also get the stripe session id somewhere, its is best to store that in DB, like if we need to work with the
+                // same session like providing the refund or tracking if the payment was successfull we can do all of that
+                // if we have session id that was initiated
+
+                OrderHeader orderHeader = _db.OrderHeaders.First(u => u.OrderHeaderId == stripeRequestDto.OrderHeader.OrderHeaderId);
+                orderHeader.StripeSessionId = session.Id;
+
+                _db.SaveChanges();
+
+                _response.Result = stripeRequestDto;
+
             }
             catch (Exception ex) { 
             
