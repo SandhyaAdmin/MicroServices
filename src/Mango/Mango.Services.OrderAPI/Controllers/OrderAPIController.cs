@@ -136,5 +136,41 @@ namespace Mango.Services.OrderAPI.Controllers
             return _response;
         }
 
+        [Authorize]
+        [HttpPost("ValidateStripeSession")]
+        public async Task<ResponseDto> ValidateStripeSession([FromBody] int orderHeaderId)
+        {
+            try
+            {
+                OrderHeader orderHeader = _db.OrderHeaders.First(x => x.OrderHeaderId == orderHeaderId);
+
+                var service = new Stripe.Checkout.SessionService();
+                // we want get the session from here, using session id which we already saved in db
+                Session session = service.Get(orderHeader.StripeSessionId);
+
+                // Get the Payment intent and check if the order is successfull or not
+                var paymentIntentService = new PaymentIntentService();
+                PaymentIntent paymentIntetent = paymentIntentService.Get(session.PaymentIntentId);
+
+                if(paymentIntetent.Status == "succeeded")
+                {
+                    // then payment was successful
+                    orderHeader.PaymentIntentId = paymentIntetent.Id;
+                    orderHeader.Status = StaticDetails.Status_Approved;
+                    _db.SaveChanges();
+                    _response.Result = _mapper.Map<OrderHeaderDto>(orderHeader);
+                }
+             
+            }
+            catch (Exception ex)
+            {
+
+                _response.IsSuccess = false;
+                _response.Message = ex.Message;
+            }
+
+            return _response;
+        }
+
     }
 }

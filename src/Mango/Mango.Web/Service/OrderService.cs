@@ -1,5 +1,6 @@
 ﻿using Mango.Web.Models;
 using Mango.Web.Service.IService;
+using Mango.Web.Utility;
 
 namespace Mango.Web.Service
 {
@@ -29,6 +30,16 @@ namespace Mango.Web.Service
                 Url = Utility.StaticDetails.OrderAPIBase + "/api/order/CreateStripeSession",
                 ApiType = Utility.StaticDetails.ApiType.POST,
                 Data = stripeRequestDto
+            });
+        }
+
+        public async Task<ResponseDto?> ValidateStripeSession(int orderHeaderId)
+        {
+            return await _baseService.SendAsync(new RequestDto
+            {
+                ApiType = Utility.StaticDetails.ApiType.POST,
+                Data = orderHeaderId,
+                Url = StaticDetails.OrderAPIBase + "/api/order/ValidateStripeSession"
             });
         }
     }
