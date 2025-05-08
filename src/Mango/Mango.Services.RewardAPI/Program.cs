@@ -1,5 +1,8 @@
 using Microsoft.EntityFrameworkCore;
 using Mango.Services.RewardAPI.Data;
+using Mango.Services.RewardAPI.Services;
+using Mango.Services.RewardAPI.Extension;
+using Mango.Services.EmailAPI.Messaging;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -18,6 +21,12 @@ builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnectionString"));
 });
 
+// Injecting DBContext in the Reward Service
+var optionBuilder = new DbContextOptionsBuilder<AppDbContext>();
+optionBuilder.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnectionString"));
+
+builder.Services.AddSingleton(new RewardService(optionBuilder.Options));
+builder.Services.AddSingleton<IAzureServiceBusConsumer, AzureServiceBusConsumer>();
 
 var app = builder.Build();
 
@@ -36,6 +45,7 @@ app.UseAuthorization();
 app.MapControllers();
 
 ApplyMigration();
+app.UseServiceBusConsumer();
 app.Run();
 
 void ApplyMigration()

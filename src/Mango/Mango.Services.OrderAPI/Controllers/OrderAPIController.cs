@@ -10,6 +10,7 @@ using Mango.Services.OrderAPI.Models;
 using Newtonsoft.Json;
 using Stripe;
 using Stripe.Checkout;
+using Mango.MessageBus;
 
 namespace Mango.Services.OrderAPI.Controllers
 {
@@ -21,13 +22,18 @@ namespace Mango.Services.OrderAPI.Controllers
         private IMapper _mapper;
         private readonly AppDbContext _db;
         private IProductService _productService;
+        private readonly IMessageBus _messageBus;
+        private readonly IConfiguration _configuration;
 
-        public OrderAPIController(IMapper mapper, AppDbContext db, IProductService productService)
+
+        public OrderAPIController(IMapper mapper, AppDbContext db, IProductService productService, IMessageBus messageBus, IConfiguration configuration)
         {
             _response = new ResponseDto();
             _mapper = mapper;
             _db = db;
             _productService = productService;
+            _messageBus = messageBus;
+            _configuration = configuration; 
         }
 
         //[Authorize]
@@ -158,6 +164,18 @@ namespace Mango.Services.OrderAPI.Controllers
                     orderHeader.PaymentIntentId = paymentIntetent.Id;
                     orderHeader.Status = StaticDetails.Status_Approved;
                     _db.SaveChanges();
+
+                    RewardDto rewardDto = new()
+                    {
+                        UserId = orderHeader.UserId,
+                        OrderId = orderHeader.OrderHeaderId,
+                        RewardsActivity = Convert.ToInt32(orderHeader.OrderTotal)
+
+                    };
+
+                    string topicName = _configuration.GetValue<string>("TopicAndQueueNames:OrderCreatedTopic");
+
+                    await _messageBus.PublishMessage(rewardDto, topicName);
                     _response.Result = _mapper.Map<OrderHeaderDto>(orderHeader);
                 }
              
