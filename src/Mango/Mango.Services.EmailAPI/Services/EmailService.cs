@@ -35,7 +35,7 @@ namespace Mango.Services.EmailAPI.Services
 
         public async Task LogOrderPlaced(RewardMessage rewardMessage)
         {
-            string message = "New order placed. </br> OrderID" + rewardMessage.OrderId;
+            string message = "New order placed. </br> OrderID : " + rewardMessage.OrderId;
 
             await LogAndEmail(message, "dotnetmastery@gmail.com");
         }

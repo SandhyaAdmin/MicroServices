@@ -26,8 +26,8 @@ namespace Mango.Services.EmailAPI.Messaging
 
             serviceBusConnectionString = _configuration.GetValue<string>("ServiceBusConnectionString");
 
-            orderCreatedTopic = _configuration.GetValue<string>("TopicAndQueueNames:OrderCreated");
-            orderCreatedRewardSubscription = _configuration.GetValue<string>("TopicAndQueueNames:OrdersCreatedRewardsUpdate");
+            orderCreatedTopic = _configuration.GetValue<string>("TopicAndQueueNames:OrderCreatedTopic");
+            orderCreatedRewardSubscription = _configuration.GetValue<string>("TopicAndQueueNames:OrderCreated_Rewards_Subscription");
 
             var client = new ServiceBusClient(serviceBusConnectionString);
             _rewardProcessor = client.CreateProcessor(orderCreatedTopic, orderCreatedRewardSubscription);
@@ -44,7 +44,7 @@ namespace Mango.Services.EmailAPI.Messaging
 
         public async Task Stop()
         {
-           await _rewardProcessor.StartProcessingAsync();
+           await _rewardProcessor.StopProcessingAsync();
            await _rewardProcessor.DisposeAsync();
         }
 
