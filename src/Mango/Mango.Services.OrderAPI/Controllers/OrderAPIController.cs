@@ -92,6 +92,43 @@ namespace Mango.Services.OrderAPI.Controllers
             return _response;
         }
 
+        [Authorize]
+        [HttpPost("UpdateOrderStatus/{orderId:int}")]
+
+        public async Task<ResponseDto?> UpdateOrderStatus(int orderId, [FromBody] string newStatus)
+        {
+            try
+            {
+                // To update the order status in the db, first we need to get the orderheader where we want to update the status
+                OrderHeader orderHeader = _db.OrderHeaders.First(u=> u.OrderHeaderId == orderId);
+                if (orderHeader != null)
+                {
+                    if(newStatus == StaticDetails.Status_Cancelled)
+                    {
+                        // if admin is updating the order placed by customer as cancelled then need to provide the refund, before updating the status
+
+                        var options = new RefundCreateOptions
+                        {
+                            Reason = RefundReasons.RequestedByCustomer,
+                            PaymentIntent = orderHeader.PaymentIntentId
+                        };
+
+                        var refundService = new RefundService();
+                        Refund refund = refundService.Create(options);
+
+                    }
+                    orderHeader.Status = newStatus;
+                    await _db.SaveChangesAsync();
+                }
+            }
+            catch(Exception ex)
+            {
+                _response.IsSuccess = false;
+                _response.Message = ex.Message;
+            }
+            return _response;
+        }
+
 
 
         [Authorize]
