@@ -38,7 +38,7 @@ namespace Mango.Services.OrderAPI.Controllers
         }
 
         [Authorize]
-        [HttpGet("GetOrders")]
+        [HttpGet("GetAllOrders")]
         public ResponseDto? Get(string? userId = "")
         {
             try
@@ -94,7 +94,6 @@ namespace Mango.Services.OrderAPI.Controllers
 
         [Authorize]
         [HttpPost("UpdateOrderStatus/{orderId:int}")]
-
         public async Task<ResponseDto?> UpdateOrderStatus(int orderId, [FromBody] string newStatus)
         {
             try
@@ -146,7 +145,7 @@ namespace Mango.Services.OrderAPI.Controllers
 
 
                 // If want to access the Entity, I cam use entity
-                OrderHeader orderCreated = _db.OrderHeaders.Add(_mapper.Map<OrderHeader>(orderHeaderDto)).Entity;
+                OrderHeader orderCreated = (await _db.OrderHeaders.AddAsync(_mapper.Map<OrderHeader>(orderHeaderDto))).Entity;
 
                 await _db.SaveChangesAsync();
 
