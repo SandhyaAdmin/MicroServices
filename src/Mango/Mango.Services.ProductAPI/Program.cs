@@ -73,6 +73,10 @@ app.UseAuthentication();
 
 app.UseAuthorization();
 
+// Hey look for static files whrn you are running the application, If we dont not add this application
+// dont go to www root folder, it will ignore that.
+app.UseStaticFiles();
+
 app.MapControllers();
 
 ApplyMigration();
