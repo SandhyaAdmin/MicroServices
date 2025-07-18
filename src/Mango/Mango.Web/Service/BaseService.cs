@@ -22,19 +22,55 @@ namespace Mango.Web.Service
             HttpClient client = _httpClientFactory.CreateClient("MangoAPI");
 
             HttpRequestMessage message = new();
+
+            if (requestDto.ContentType == ContentType.MultipartFormData) 
+            {
+                message.Headers.Add("Accept", "*/*");
+            }
+            else
+            {
+                message.Headers.Add("Accept", "application/json");
+            }
+
             //message.Headers.Add("Content-Type", "application/json");
             message.RequestUri = new Uri(requestDto.Url);
 
-            if (requestDto != null)
-            {
-                message.Content = new StringContent(JsonConvert.SerializeObject(requestDto.Data),Encoding.UTF8, "application/json");
-            }
+
             //token
 
             if (withBearer)
             {
                 var token = _tokenProvider.GetToken();
                 message.Headers.Add("Authorization", $"Bearer {token}");
+            }
+
+            //append the content if, it is MultipartFormData
+            if (requestDto.ContentType == ContentType.MultipartFormData)
+            {
+                var content = new MultipartFormDataContent();
+
+                // we need to read the file and add that as new stream content
+                foreach (var prop in requestDto.Data.GetType().GetProperties())
+                { 
+                    var value = prop.GetValue(requestDto.Data);
+                    // Now, we only want to upload a file if that is a form file
+                    if (value is FormFile) 
+                    { 
+                        var file = (FormFile)value;
+                        // add the file to the content if its not null
+                        if (file != null) 
+                        {
+                            content.Add(new StreamContent(file.OpenReadStream()),prop.Name,file.FileName);
+                        }
+                    }
+                }
+            }
+            else
+            {
+                if (requestDto != null)
+                {
+                    message.Content = new StringContent(JsonConvert.SerializeObject(requestDto.Data), Encoding.UTF8, "application/json");
+                }
             }
 
             HttpResponseMessage? apiResponse = null;

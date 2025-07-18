@@ -35,7 +35,8 @@ namespace Mango.Web.Service
             {
                 ApiType = StaticDetails.ApiType.POST,
                 Url = StaticDetails.ProductAPIBase + "/api/product",
-                Data = productDto
+                Data = productDto,
+                ContentType = StaticDetails.ContentType.MultipartFormData
             });
         }
         public async Task<ResponseDto?> UpdateProductAsync(ProductDto productDto)
@@ -44,7 +45,8 @@ namespace Mango.Web.Service
             {
                 ApiType = StaticDetails.ApiType.PUT,
                 Url = StaticDetails.ProductAPIBase + "/api/product",
-                Data = productDto
+                Data = productDto,
+                ContentType = StaticDetails.ContentType.MultipartFormData
             });
         }
         public async Task<ResponseDto?> DeleteProductByIdAsync(int id)
