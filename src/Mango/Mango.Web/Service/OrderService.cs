@@ -58,7 +58,7 @@ namespace Mango.Web.Service
             return await _baseService.SendAsync(new RequestDto
             {
                 ApiType = StaticDetails.ApiType.GET,
-              //  Data = userId,
+                Data = userId,
                 Url = StaticDetails.OrderAPIBase + "/api/order/GetAllOrders"
             });
         }
@@ -67,7 +67,7 @@ namespace Mango.Web.Service
         {
             return await _baseService.SendAsync(new RequestDto
             {
-                ApiType = StaticDetails.ApiType.GET,
+                ApiType = StaticDetails.ApiType.POST,
                 Data = newStatus,
                 Url = StaticDetails.OrderAPIBase + "/api/order/UpdateOrderStatus/" + orderId
 
