@@ -5,6 +5,7 @@ using Mango.Services.ProductAPI.Models.Dto;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.SignalR;
 
 namespace Mango.Services.ProductAPI.Controllers
 {
@@ -67,6 +68,29 @@ namespace Mango.Services.ProductAPI.Controllers
                 Product product = _mapper.Map<Product>(productDto);
 
                 _appDbContext.Products.Add(product);
+                _appDbContext.SaveChanges();
+
+                // saving Image of file type to wwwroot folder with filename as productId
+                if(productDto.Image != null)
+                {
+                    string fileName = product.ProductId + Path.GetExtension(productDto.Image.FileName);
+                    string filePath = @"wwwroot\ProductImages\" + fileName;
+                    string filePathDirectory = Path.Combine(Directory.GetCurrentDirectory(), filePath);
+                    // Copy the image file to file path directory
+                    using (var fileStrem = new FileStream(filePathDirectory, FileMode.Create))
+                    {
+                        productDto.Image.CopyTo(fileStrem);
+                    }
+                    var baseUrl = $"{HttpContext.Request.Scheme}://{HttpContext.Request.Host.Value}{HttpContext.Request.PathBase.Value}";
+                    product.ImageLocalPath = $"{baseUrl}/{filePath}";
+                    product.ImageUrl = filePath;    
+
+                }
+                else
+                {
+                    productDto.ImageUrl = "https://placehold.co/600*400";
+                }
+                _appDbContext.Products.Update(product);
                 _appDbContext.SaveChanges();
 
                  _responseDto.Result = _mapper.Map<ProductDto>(product);
