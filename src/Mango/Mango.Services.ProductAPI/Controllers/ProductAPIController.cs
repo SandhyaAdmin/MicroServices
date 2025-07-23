@@ -82,8 +82,8 @@ namespace Mango.Services.ProductAPI.Controllers
                         productDto.Image.CopyTo(fileStrem);
                     }
                     var baseUrl = $"{HttpContext.Request.Scheme}://{HttpContext.Request.Host.Value}{HttpContext.Request.PathBase.Value}";
-                    product.ImageLocalPath = $"{baseUrl}/{filePath}";
-                    product.ImageUrl = filePath;    
+                    product.ImageLocalPath = filePath;
+                    product.ImageUrl = baseUrl+"/ProductImages/"+fileName;    
 
                 }
                 else
@@ -106,11 +106,38 @@ namespace Mango.Services.ProductAPI.Controllers
 
         [HttpPut]
         [Authorize(Roles = "ADMIN")]
-        public ResponseDto Put([FromBody] ProductDto productDto)
+        public ResponseDto Put(ProductDto productDto)
         {
             try
             {
                Product product = _mapper.Map<Product>(productDto);
+
+               if(productDto.Image != null)
+                {
+                    // Delete product image from local path first
+                    if (!string.IsNullOrEmpty(product.ImageLocalPath))
+                    {
+                        var oldDirectoryPath = Path.Combine(Directory.GetCurrentDirectory(), product.ImageLocalPath);
+                        FileInfo file = new FileInfo(oldDirectoryPath);
+                        if (file.Exists)
+                        {
+                            file.Delete();
+                        }
+                    }
+
+                    //then add the new updated image to the local path then save new ImageLocalPath and new ImageUrl on to teh DB
+                    string fileName = product.ProductId + Path.GetExtension(productDto.Image.FileName);
+                    string filePath = @"wwwroot\ProductImages\" + fileName;
+                    string filePathDirectory = Path.Combine(Directory.GetCurrentDirectory(), filePath);
+                    // Copy the image file to file path directory
+                    using (var fileStrem = new FileStream(filePathDirectory, FileMode.Create))
+                    {
+                        productDto.Image.CopyTo(fileStrem);
+                    }
+                    var baseUrl = $"{HttpContext.Request.Scheme}://{HttpContext.Request.Host.Value}{HttpContext.Request.PathBase.Value}";
+                    product.ImageLocalPath = filePath;
+                    product.ImageUrl = baseUrl + "/ProductImages/" + fileName;
+                }
                 _appDbContext.Products.Update(product); 
                 _appDbContext.SaveChanges();
 
@@ -132,6 +159,17 @@ namespace Mango.Services.ProductAPI.Controllers
             try
             {
                Product product =  _appDbContext.Products.First(x => x.ProductId == id);
+
+                //Deleting the file from wwwroot folder 
+                if (!string.IsNullOrEmpty(product.ImageLocalPath))
+                {
+                    var oldDirectoryPath = Path.Combine(Directory.GetCurrentDirectory(), product.ImageLocalPath);
+                    FileInfo file = new FileInfo(oldDirectoryPath);
+                    if (file.Exists) 
+                    {
+                        file.Delete();  
+                    }
+                }
                 _appDbContext.Products.Remove(product);
                 _appDbContext.SaveChanges();
             }
