@@ -38,8 +38,8 @@ namespace Mango.Services.OrderAPI.Controllers
         }
 
         [Authorize]
-        [HttpGet("GetAllOrders")]
-        public ResponseDto? Get([FromBody] string? userId = "")
+        [HttpGet("GetAllOrders/{userId}")]
+        public ResponseDto? Get(string? userId = "")
         {
             try
             {
